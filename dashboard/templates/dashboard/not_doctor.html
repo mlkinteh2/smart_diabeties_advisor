@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Access Denied{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="alert alert-error">
+        <h3>Access Denied</h3>
+        <p>You do not have permission to view this page.</p>
+        <a href="{% url 'home' %}" class="btn btn-primary" style="margin-top: 1rem;">Go Home</a>
+    </div>
+</div>
+{% endblock %}

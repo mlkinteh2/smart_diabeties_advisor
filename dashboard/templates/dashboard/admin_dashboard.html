@@ -1,0 +1,469 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block page_subtitle %}System Overview & Management{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    /* Dashboard Specific Styles */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .stat-content p {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+    }
+
+    .stat-content h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0;
+    }
+
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .icon-users {
+        background: #f5f3ff;
+        color: #7c3aed;
+    }
+
+    .icon-doctors {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .icon-patients {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .icon-predictions {
+        background: #fffbeb;
+        color: #d97706;
+    }
+
+    /* Main Content Layout */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1.8fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .card-panel {
+        background: white;
+        border-radius: 1.25rem;
+        padding: 1.75rem;
+        border: 1px solid #f1f5f9;
+        height: 100%;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .panel-header h2 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-main);
+    }
+
+    /* Activity Feed */
+    .activity-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .activity-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        background: #fcfcfc;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+    }
+
+    .activity-info {
+        flex-grow: 1;
+    }
+
+    .activity-info h4 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        margin: 0 0 0.125rem 0;
+        color: var(--text-main);
+    }
+
+    .activity-info p {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    /* System Health */
+    .health-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .health-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+    }
+
+    .health-label {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .health-label i {
+        font-size: 1.25rem;
+        color: #10b981;
+    }
+
+    .health-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
+
+    .health-details {
+        text-align: right;
+    }
+
+    .health-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--text-main);
+        display: block;
+    }
+
+    .health-badge {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.5rem;
+        background: #f0fdf4;
+        color: #166534;
+        border-radius: 99px;
+        font-weight: 600;
+    }
+
+    /* Bottom Section */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+
+    .action-card {
+        padding: 1.75rem;
+        border-radius: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        transition: transform 0.2s;
+        text-align: center;
+    }
+
+    .action-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .action-card i {
+        font-size: 1.75rem;
+    }
+
+    .action-card span {
+        font-weight: 700;
+        font-size: 0.9375rem;
+    }
+
+    .bg-blue-soft {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .bg-green-soft {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .bg-yellow-soft {
+        background: #fffbeb;
+        color: #d97706;
+    }
+
+    .bg-purple-soft {
+        background: #faf5ff;
+        color: #9333ea;
+    }
+
+    /* Prediction Stats */
+    .stats-table {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .stats-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+    }
+
+    .stats-label {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .stats-value {
+        font-weight: 700;
+        color: var(--text-main);
+        font-size: 1rem;
+    }
+
+    .value-highlight {
+        color: #10b981;
+    }
+
+    @media (max-width: 1200px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .content-grid,
+        .bottom-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Stats Cards -->
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <div class="stat-content">
+            <p>Total Users</p>
+            <h3>{{ total_users }}</h3>
+        </div>
+        <div class="stat-icon-wrapper icon-users">
+            <i class="bi bi-people"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-content">
+            <p>Active Doctors</p>
+            <h3>{{ active_doctors }}</h3>
+        </div>
+        <div class="stat-icon-wrapper icon-doctors">
+            <i class="bi bi-person-badge"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-content">
+            <p>Active Patients</p>
+            <h3>{{ active_patients }}</h3>
+        </div>
+        <div class="stat-icon-wrapper icon-patients">
+            <i class="bi bi-person-heart"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-content">
+            <p>Total Predictions</p>
+            <h3>{{ total_predictions }}</h3>
+        </div>
+        <div class="stat-icon-wrapper icon-predictions">
+            <i class="bi bi-file-earmark-text"></i>
+        </div>
+    </div>
+</div>
+
+<div class="content-grid">
+    <!-- Recent Activity -->
+    <div class="card-panel">
+        <div class="panel-header">
+            <h2>Recent Activity</h2>
+        </div>
+        <div class="activity-feed">
+            {% for activity in recent_activities %}
+            <div class="activity-row">
+                <div class="activity-icon bg-{{ activity.color }} bg-opacity-10 text-{{ activity.color }}">
+                    <i class="bi {{ activity.icon }}"></i>
+                </div>
+                <div class="activity-info">
+                    <h4>{{ activity.title }}</h4>
+                    <p>{{ activity.description }}</p>
+                </div>
+                <div class="activity-time">{{ activity.timestamp|timesince }} ago</div>
+            </div>
+            {% empty %}
+            <p class="text-center text-muted py-4">No recent activity.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="card-panel">
+        <div class="panel-header">
+            <h2>System Health</h2>
+        </div>
+        <div class="health-list">
+            <div class="health-item">
+                <div class="health-label">
+                    <i class="bi bi-cpu"></i>
+                    <span class="health-name">API Response Time</span>
+                </div>
+                <div class="health-details">
+                    <span class="health-value">{{ system_health.api_response_time }}ms</span>
+                    <span class="health-badge"><i class="bi bi-check-circle-fill me-1"></i>Healthy</span>
+                </div>
+            </div>
+            <div class="health-item">
+                <div class="health-label">
+                    <i class="bi bi-database"></i>
+                    <span class="health-name">Database Load</span>
+                </div>
+                <div class="health-details">
+                    <span class="health-value">{{ system_health.database_load }}%</span>
+                    <span class="health-badge"><i class="bi bi-check-circle-fill me-1"></i>Healthy</span>
+                </div>
+            </div>
+            <div class="health-item">
+                <div class="health-label">
+                    <i class="bi bi-hdd-network"></i>
+                    <span class="health-name">Server Uptime</span>
+                </div>
+                <div class="health-details">
+                    <span class="health-value">{{ system_health.server_uptime }}%</span>
+                    <span class="health-badge"><i class="bi bi-check-circle-fill me-1"></i>Healthy</span>
+                </div>
+            </div>
+            <div class="health-item">
+                <div class="health-label">
+                    <i class="bi bi-person-check"></i>
+                    <span class="health-name">Active Sessions</span>
+                </div>
+                <div class="health-details">
+                    <span class="health-value">{{ system_health.active_sessions }}</span>
+                    <span class="health-badge"><i class="bi bi-check-circle-fill me-1"></i>Healthy</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-grid">
+    <!-- Quick Actions -->
+    <div class="card-panel">
+        <div class="panel-header">
+            <h2>Quick Actions</h2>
+        </div>
+        <div class="actions-grid">
+            <a href="/admin/auth/user/add/" class="action-card bg-blue-soft">
+                <i class="bi bi-person-plus"></i>
+                <span>Add User</span>
+            </a>
+            <a href="{% url 'prediction_list' %}" class="action-card bg-green-soft">
+                <i class="bi bi-file-earmark-bar-graph"></i>
+                <span>View Reports</span>
+            </a>
+            <a href="/admin/" class="action-card bg-yellow-soft">
+                <i class="bi bi-gear"></i>
+                <span>Settings</span>
+            </a>
+            <a href="/admin/admin/logentry/" class="action-card bg-purple-soft">
+                <i class="bi bi-database-fill-gear"></i>
+                <span>Backup</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Prediction Statistics -->
+    <div class="card-panel">
+        <div class="panel-header">
+            <h2>Prediction Statistics</h2>
+        </div>
+        <div class="stats-table">
+            <div class="stats-row">
+                <span class="stats-label">Today's Predictions</span>
+                <span class="stats-value">{{ todays_predictions }}</span>
+            </div>
+            <hr class="m-0" style="opacity: 0.05;">
+            <div class="stats-row">
+                <span class="stats-label">This Week</span>
+                <span class="stats-value">{{ week_predictions }}</span>
+            </div>
+            <hr class="m-0" style="opacity: 0.05;">
+            <div class="stats-row">
+                <span class="stats-label">This Month</span>
+                <span class="stats-value">{{ month_predictions }}</span>
+            </div>
+            <hr class="m-0" style="opacity: 0.05;">
+            <div class="stats-row">
+                <span class="stats-label">Approval Rate</span>
+                <span class="stats-value value-highlight">{{ approval_rate }}%</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

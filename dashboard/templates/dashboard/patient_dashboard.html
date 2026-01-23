@@ -1,0 +1,454 @@
+{% extends 'dashboard/patient_base.html' %}
+{% load static %}
+{% load markdown_filters %}
+
+{% block title %}Patient Portal - Smart Diabetes Advisor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dashboard Header */
+    .dashboard-header {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        border-radius: 1rem;
+    }
+
+    .header-title-section h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .header-title-section p {
+        color: #64748b;
+        margin: 0;
+        font-size: 0.875rem;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .notification-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .notification-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .user-profile-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #10b981;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        cursor: pointer;
+        border: 2px solid #10b981;
+        transition: all 0.2s;
+    }
+
+    .user-profile-btn:hover {
+        background: #059669;
+        border-color: #059669;
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+
+    .risk-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .risk-badge.high {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .risk-badge.medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .risk-badge.low {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    /* Action Cards */
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+        color: inherit;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+    }
+
+    .action-card:hover {
+        border-color: #10b981;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .action-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    /* Assessment Summary */
+    .assessment-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+    }
+
+    .risk-item {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .risk-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .risk-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .risk-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .risk-factors-box {
+        background: #fff1f2;
+        border: 1px solid #fecdd3;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    .risk-factors-title {
+        color: #991b1b;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .factor-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        color: #7f1d1d;
+        font-size: 0.9rem;
+    }
+
+    .factor-list li {
+        margin-bottom: 0.25rem;
+        padding-left: 1rem;
+        position: relative;
+    }
+
+    .factor-list li::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+    }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="header-title-section">
+        <h1>My Health Dashboard</h1>
+        <p>Welcome back, {{ user.first_name|default:user.username }}</p>
+    </div>
+    <div class="header-actions">
+        <button class="notification-btn" title="Notifications">
+            <i class="bi bi-bell"></i>
+        </button>
+        <div class="user-profile-btn" title="{{ user.username }}">
+            {{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}
+        </div>
+    </div>
+</div>
+
+{% if latest_prediction %}
+<!-- Top Stats Cards -->
+<div class="summary-grid">
+    <!-- Diabetes Risk -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <i
+                class="bi bi-droplet-fill {% if latest_prediction.diabetes_risk == 'High' %}text-danger{% elif latest_prediction.diabetes_risk == 'Medium' %}text-warning{% else %}text-success{% endif %}"></i>
+            Diabetes Risk
+        </div>
+        <div
+            class="stat-value {% if latest_prediction.diabetes_risk == 'High' %}text-danger{% elif latest_prediction.diabetes_risk == 'Medium' %}text-warning{% else %}text-success{% endif %}">
+            {{ latest_prediction.diabetes_probability|floatformat:0 }}%</div>
+        <span class="risk-badge {{ latest_prediction.diabetes_risk|lower }}">
+            {{ latest_prediction.diabetes_risk }} Risk
+        </span>
+    </div>
+
+    <!-- Kidney Risk -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <i
+                class="bi bi-lungs-fill {% if latest_prediction.kidney_risk == 'High' %}text-danger{% elif latest_prediction.kidney_risk == 'Medium' %}text-warning{% else %}text-success{% endif %}"></i>
+            Kidney Risk
+        </div>
+        <div
+            class="stat-value {% if latest_prediction.kidney_risk == 'High' %}text-danger{% elif latest_prediction.kidney_risk == 'Medium' %}text-warning{% else %}text-success{% endif %}">
+            {{ latest_prediction.kidney_probability|floatformat:0 }}%</div>
+        <span class="risk-badge {{ latest_prediction.kidney_risk|lower }}">
+            {{ latest_prediction.kidney_risk }} Risk
+        </span>
+    </div>
+
+    <!-- Last Updated -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <i class="bi bi-calendar-check text-primary"></i> Last Updated
+        </div>
+        <div class="stat-value" style="font-size: 1.25rem; margin-bottom: 0.25rem;">
+            {{ latest_prediction.created_at|date:"M d, Y" }}
+        </div>
+        <small class="text-muted">{{ latest_prediction.created_at|timesince }} ago</small>
+    </div>
+
+    <!-- Status -->
+    <div class="stat-card">
+        <div class="stat-header">
+            <i class="bi bi-shield-check text-success"></i> Status
+        </div>
+        <span class="risk-badge low mb-2">Doctor Approved</span>
+        <div class="text-muted small">Dr. {{ latest_prediction.doctor.user.last_name|default:"Smith" }}</div>
+    </div>
+</div>
+
+<!-- Action Cards -->
+<div class="action-grid">
+    <a href="{% url 'patient_prediction_detail' latest_prediction.id %}" class="action-card">
+        <div class="action-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div>
+            <h6 class="mb-0 fw-bold">View Full Report</h6>
+            <small class="text-muted">Detailed risk analysis</small>
+        </div>
+    </a>
+
+    <a href="{% url 'patient_recommendations' %}" class="action-card">
+        <div class="action-icon bg-success bg-opacity-10 text-success">
+            <i class="bi bi-heart-pulse"></i>
+        </div>
+        <div>
+            <h6 class="mb-0 fw-bold">Recommendations</h6>
+            <small class="text-muted">Personalized health tips</small>
+        </div>
+    </a>
+
+    <a href="{% url 'patient_history' %}" class="action-card">
+        <div class="action-icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-clock-history"></i>
+        </div>
+        <div>
+            <h6 class="mb-0 fw-bold">View History</h6>
+            <small class="text-muted">Past assessments</small>
+        </div>
+    </a>
+</div>
+
+<!-- Latest Assessment Summary -->
+<div class="assessment-section">
+    <h3 class="section-title">Latest Assessment Summary</h3>
+
+    <!-- Diabetes Assessment -->
+    <div class="risk-item">
+        <div class="risk-header">
+            <span class="risk-title">Diabetes Risk Assessment</span>
+            {% comment %} Diabetes Risk Badge {% endcomment %}
+            {% if latest_prediction.diabetes_risk == "Low" %}
+            <span class="badge bg-success text-white px-3 py-2 rounded-pill">
+                Low Risk — {{ latest_prediction.diabetes_probability|floatformat:0 }}%
+            </span>
+            {% elif latest_prediction.diabetes_risk == "Medium" %}
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                Medium Risk — {{ latest_prediction.diabetes_probability|floatformat:0 }}%
+            </span>
+            {% else %}
+            <span class="badge bg-danger text-white px-3 py-2 rounded-pill">
+                High Risk — {{ latest_prediction.diabetes_probability|floatformat:0 }}%
+            </span>
+            {% endif %}
+        </div>
+        <p class="text-muted mb-3">
+            Your assessment indicates a <strong>{{ latest_prediction.diabetes_risk|lower }}</strong> risk for
+            Type 2 Diabetes.
+            {% if latest_prediction.diabetes_risk == 'High' %}
+            This is primarily influenced by high glucose levels, elevated BMI, and blood pressure readings.
+            {% elif latest_prediction.diabetes_risk == 'Medium' %}
+            Monitor your lifestyle choices to prevent progression.
+            {% else %}
+            Keep up the healthy lifestyle!
+            {% endif %}
+        </p>
+
+        {% if latest_prediction.diabetes_risk != 'Low' %}
+        <div class="risk-factors-box">
+            <div class="risk-factors-title">
+                <i class="bi bi-exclamation-triangle"></i> Key Risk Factors:
+            </div>
+            <ul class="factor-list">
+                <!-- We are simulating these values from the latest prediction features if available, or static for demo -->
+                <!-- In a real app, we'd iterate over prediction.features -->
+                <li>Glucose Level: Monitor closely (Target: 70-100 mg/dL)</li>
+                <li>BMI: Maintain healthy weight (Target: 18.5-24.9)</li>
+                <li>Blood Pressure: Keep below 120/80 mmHg</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Kidney Assessment -->
+    <div class="risk-item">
+        <div class="risk-header">
+            <span class="risk-title">Kidney Disease Risk Assessment</span>
+            {% comment %} Kidney Risk Badge {% endcomment %}
+            {% if latest_prediction.kidney_risk == "Low" %}
+            <span class="badge bg-success text-white px-3 py-2 rounded-pill">
+                Low Risk — {{ latest_prediction.kidney_probability|floatformat:0 }}%
+            </span>
+            {% elif latest_prediction.kidney_risk == "Medium" %}
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                Medium Risk — {{ latest_prediction.kidney_probability|floatformat:0 }}%
+            </span>
+            {% else %}
+            <span class="badge bg-danger text-white px-3 py-2 rounded-pill">
+                High Risk — {{ latest_prediction.kidney_probability|floatformat:0 }}%
+            </span>
+            {% endif %}
+        </div>
+        <div class="mt-4">
+            {% if latest_prediction.recommendation_text or latest_prediction.recommendation %}
+            {% if latest_prediction.recommendation_text %}
+            {{ latest_prediction.recommendation_text|safe }}
+            {% else %}
+            {{ latest_prediction.recommendation.text|safe }}
+            {% endif %}
+            {% else %}
+            <p class="text-muted">Close monitoring and lifestyle adjustments are recommended.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+        <i class="bi bi-clipboard-pulse text-muted" style="font-size: 3rem;"></i>
+    </div>
+    <h3>No Assessments Yet</h3>
+    <p class="text-muted">Once your doctor creates a prediction, it will appear here.</p>
+</div>
+{% endif %}
+{% endblock %}

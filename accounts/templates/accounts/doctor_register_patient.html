@@ -1,0 +1,110 @@
+{% extends 'dashboard/doctor_base.html' %}
+{% load static %}
+
+{% block title %}Register Patient - Smart Diabetes Advisor{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>Register New Patient</h4>
+            </div>
+            <div class="card-body p-5">
+                <p class="text-muted mb-4">Create a new patient account. The patient will suffer valid credentials to
+                    log in.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label fw-semibold">First Name</label>
+                            <input type="text" name="first_name" class="form-control" id="id_first_name"
+                                placeholder="First Name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label fw-semibold">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" id="id_last_name"
+                                placeholder="Last Name" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_username" class="form-label fw-semibold">Username</label>
+                            <input type="text" name="username" class="form-control" id="id_username"
+                                placeholder="Choose a username (e.g., p_jdoe)" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="id_email" class="form-label fw-semibold">Email</label>
+                            <input type="email" name="email" class="form-control" id="id_email"
+                                placeholder="patient@email.com" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_age" class="form-label fw-semibold">Age</label>
+                            <input type="number" name="age" class="form-control" id="id_age" placeholder="Patient's age"
+                                required min="1" max="120">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="id_gender" class="form-label fw-semibold">Gender</label>
+                            <select name="gender" class="form-select" id="id_gender" required>
+                                <option value="">Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_phone" class="form-label fw-semibold">Phone Number</label>
+                        <input type="tel" name="phone" class="form-control" id="id_phone" placeholder="+1234567890"
+                            required>
+                    </div>
+
+                    <div class="alert alert-info border-info">
+                        <i class="bi bi-info-circle me-2"></i> Set a temporary password for the patient. They can change
+                        it later.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_password1" class="form-label fw-semibold">Password</label>
+                        <input type="password" name="password1" class="form-control" id="id_password1"
+                            placeholder="Create a password" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_password2" class="form-label fw-semibold">Confirm Password</label>
+                        <input type="password" name="password2" class="form-control" id="id_password2"
+                            placeholder="Re-enter password" required>
+                    </div>
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                        <p class="mb-0"><strong>{{ field|title }}:</strong> {{ error }}</p>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="{% url 'doctor_dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+                            <i class="bi bi-person-plus-fill me-2"></i>Register Patient
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

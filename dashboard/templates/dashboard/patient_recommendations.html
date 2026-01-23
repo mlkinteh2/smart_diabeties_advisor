@@ -1,0 +1,46 @@
+{% extends 'dashboard/patient_base.html' %}
+{% load static %}
+
+{% block title %}My Health Recommendations - Smart Diabetes Advisor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Add any recommendation-specific styles here if needed, 
+       but most are handled by the base template or common classes */
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">Personalized Recommendations</h3>
+        <p class="text-muted mb-0">Health guidance based on your risk assessment</p>
+    </div>
+    <button class="btn btn-light border" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i> Print Guide
+    </button>
+</div>
+
+{% if latest_prediction %}
+{% if latest_prediction.recommendation_text or latest_prediction.recommendation %}
+{% if latest_prediction.recommendation_text %}
+{{ latest_prediction.recommendation_text|safe }}
+{% else %}
+{{ latest_prediction.recommendation.text|safe }}
+{% endif %}
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i> No specific recommendations available yet.
+</div>
+{% endif %}
+{% else %}
+<div class="text-center py-5">
+    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+        <i class="bi bi-clipboard-pulse text-muted" style="font-size: 3rem;"></i>
+    </div>
+    <h3>No Assessments Yet</h3>
+    <p class="text-muted">Once your doctor creates a prediction, recommendations will appear here.</p>
+    <a href="{% url 'patient_dashboard' %}" class="btn btn-primary mt-3">Go to Dashboard</a>
+</div>
+{% endif %}
+{% endblock %}

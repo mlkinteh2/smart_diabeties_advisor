@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verification Pending - Smart Diabetes Advisor{% endblock %}
+
+{% block content %}
+<style>
+    .verification-container {
+        max-width: 600px;
+        margin: 100px auto;
+        text-align: center;
+    }
+
+    .verification-card {
+        background: white;
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-icon {
+        font-size: 4rem;
+        color: #f59e0b;
+        margin-bottom: 1.5rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: #fef3c7;
+        color: #92400e;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .verification-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1rem;
+    }
+
+    .verification-message {
+        color: #64748b;
+        font-size: 1.125rem;
+        line-height: 1.8;
+        margin-bottom: 2rem;
+    }
+
+    .info-box {
+        background: #f8fafc;
+        border-left: 4px solid #2563eb;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: left;
+        margin-top: 2rem;
+    }
+
+    .info-box h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .info-box ul {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: #475569;
+    }
+
+    .info-box li {
+        margin-bottom: 0.5rem;
+    }
+
+    .logout-btn {
+        margin-top: 2rem;
+        padding: 0.75rem 2rem;
+        background: #f1f5f9;
+        color: #475569;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+        text-decoration: none;
+    }
+</style>
+
+<div class="verification-container">
+    <div class="verification-card">
+        <div class="status-icon">
+            <i class="bi bi-clock-history"></i>
+        </div>
+
+        <span class="status-badge">
+            <i class="bi bi-hourglass-split me-2"></i>Pending Verification
+        </span>
+
+        <h1 class="verification-title">Account Verification Required</h1>
+
+        <p class="verification-message">
+            Your account is awaiting verification by a medical professional.
+            Once verified, you'll have full access to all features including predictions,
+            recommendations, and medical history.
+        </p>
+
+        <div class="info-box">
+            <h4><i class="bi bi-info-circle me-2"></i>What happens next?</h4>
+            <ul>
+                <li>A doctor will review your account details</li>
+                <li>You'll receive full access once verified</li>
+                <li>This process typically takes 24-48 hours</li>
+                <li>You'll be notified via your registered contact</li>
+            </ul>
+        </div>
+
+        <div class="info-box mt-3">
+            <h4><i class="bi bi-shield-check me-2"></i>Why verification?</h4>
+            <ul>
+                <li>Ensures patient safety and data security</li>
+                <li>Prevents unauthorized access to medical records</li>
+                <li>Maintains HIPAA compliance standards</li>
+            </ul>
+        </div>
+
+        <a href="{% url 'logout' %}" class="logout-btn">
+            <i class="bi bi-box-arrow-right me-2"></i>Logout
+        </a>
+    </div>
+</div>
+{% endblock %}

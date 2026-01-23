@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Hide the base template navbar for patient dashboard pages */
+    body>nav.navbar {
+        display: none !important;
+    }
+
+    /* Remove container padding since we have full-width layout */
+    body>main.container {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f8fafc;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        width: 250px;
+        flex-shrink: 0;
+        background-color: white;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        padding-top: 1.5rem;
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0 1rem;
+        margin: 0;
+        margin-top: 1rem;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        color: #64748b;
+        text-decoration: none;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .sidebar-link:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .sidebar-link.active {
+        background-color: #10b981;
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+    }
+
+    .sidebar-link.text-danger:hover {
+        background-color: #fef2f2;
+        color: #ef4444;
+    }
+
+    .sidebar-link i {
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+        flex-grow: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    /* Global Risk Colors */
+    .bar-fill.high {
+        background-color: #ef4444;
+    }
+
+    /* Red */
+    .bar-fill.medium {
+        background-color: #f59e0b;
+    }
+
+    /* Orange */
+    .bar-fill.low {
+        background-color: #10b981;
+    }
+
+    /* Green */
+
+    /* Risk Badges Global */
+    .risk-badge.high {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .risk-badge.medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .risk-badge.low {
+        background: #dcfce7;
+        color: #166534;
+    }
+</style>
+
+{% block extra_css %}
+{% endblock %}
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="d-flex align-items-center mb-4 px-4">
+            <div class="bg-success text-white rounded-3 p-2 me-2">
+                <i class="bi bi-heart-pulse-fill"></i>
+            </div>
+            <div>
+                <h6 class="mb-0 fw-bold text-dark">Smart Diabetes Advisor</h6>
+                <small class="text-muted">Patient Portal</small>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{% url 'patient_dashboard' %}"
+                    class="sidebar-link {% if request.resolver_match.url_name == 'patient_dashboard' %}active{% endif %}">
+                    <i class="bi bi-grid-fill"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'patient_latest_report' %}"
+                    class="sidebar-link {% if request.resolver_match.url_name == 'patient_latest_report' or request.resolver_match.url_name == 'patient_prediction_detail' %}active{% endif %}">
+                    <i class="bi bi-file-text"></i> My Report
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'patient_recommendations' %}"
+                    class="sidebar-link {% if request.resolver_match.url_name == 'patient_recommendations' %}active{% endif %}">
+                    <i class="bi bi-heart"></i> Recommendations
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'patient_history' %}"
+                    class="sidebar-link {% if request.resolver_match.url_name == 'patient_history' %}active{% endif %}">
+                    <i class="bi bi-clock-history"></i> History
+                </a>
+            </li>
+            <li>
+                <a href="#" class="sidebar-link">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </li>
+        </ul>
+
+        <div class="mt-auto px-4 pb-4">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit"
+                    class="btn btn-link text-danger text-decoration-none p-0 d-flex align-items-center sidebar-link w-100">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        {% block dashboard_content %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{% block patient_js %}{% endblock %}
+{% endblock %}

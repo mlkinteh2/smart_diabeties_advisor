@@ -1,0 +1,230 @@
+{% extends 'dashboard/patient_base.html' %}
+{% load static %}
+
+{% block title %}My Health Report - Smart Diabetes Advisor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Detail Cards */
+    .detail-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Risk Cards Professional Style */
+    .risk-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .risk-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #e2e8f0;
+        /* added border for better definition on white bg */
+    }
+
+    .risk-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Risk Bands */
+    .risk-card.low {
+        border-top: 6px solid #22c55e;
+    }
+
+    .risk-card.medium {
+        border-top: 6px solid #eab308;
+    }
+
+    .risk-card.high {
+        border-top: 6px solid #ef4444;
+    }
+
+    .risk-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .probability {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0.25rem 0;
+        line-height: 1;
+    }
+
+    .risk-label {
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-top: 0.5rem;
+    }
+
+    .risk-label.low {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .risk-label.medium {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+
+    .risk-label.high {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .recommendation-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Prediction Details</h1>
+        <p class="text-muted">Assessment from {{ prediction.created_at|date:"M d, Y" }}</p>
+    </div>
+    <a href="{% url 'patient_history' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to History
+    </a>
+</div>
+
+<div class="detail-card">
+    <h4 class="mb-4 fw-bold">Risk Assessment Results</h4>
+
+    <div class="risk-summary">
+        <!-- Diabetes Card -->
+        <div class="risk-card {{ prediction.diabetes_risk|lower }}">
+            <div class="risk-header">
+                <i class="bi bi-droplet-fill text-primary"></i> Diabetes Risk Assessment
+            </div>
+            <div class="probability">
+                {{ prediction.diabetes_probability|floatformat:1 }}%
+            </div>
+            <div class="risk-label {{ prediction.diabetes_risk|lower }}">
+                {% if prediction.diabetes_risk == 'Low' %}
+                <i class="bi bi-check-circle-fill"></i> Low Risk
+                {% elif prediction.diabetes_risk == 'Medium' %}
+                <i class="bi bi-exclamation-circle-fill"></i> Medium Risk
+                {% else %}
+                <i class="bi bi-exclamation-triangle-fill"></i> High Risk
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Kidney Card -->
+        <div class="risk-card {{ prediction.kidney_risk|lower }}">
+            <div class="risk-header">
+                <i class="bi bi-lungs-fill text-primary"></i> Kidney Risk
+            </div>
+            <div class="probability">
+                {{ prediction.kidney_probability|floatformat:1 }}%
+            </div>
+            <div class="risk-label {{ prediction.kidney_risk|lower }}">
+                {% if prediction.kidney_risk == 'Low' %}
+                <i class="bi bi-check-circle-fill"></i> Low Risk
+                {% elif prediction.kidney_risk == 'Medium' %}
+                <i class="bi bi-exclamation-circle-fill"></i> Medium Risk
+                {% else %}
+                <i class="bi bi-exclamation-triangle-fill"></i> High Risk
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if prediction.recommendation_text or recommendation %}
+    <div class="recommendation-box">
+        <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-clipboard-check text-success fs-4 me-2"></i>
+            <h5 class="mb-0 fw-bold text-success">Doctor's Recommendation</h5>
+        </div>
+        <div class="mb-0 text-dark">
+            {% if prediction.recommendation_text %}
+            {{ prediction.recommendation_text|safe }}
+            {% else %}
+            {{ recommendation.text|safe }}
+            {% endif %}
+        </div>
+        <div class="mt-3 pt-3 border-top border-success border-opacity-25 text-muted small">
+            <i class="bi bi-person-circle me-1"></i>
+            Dr. {{ prediction.doctor.user.get_full_name|default:prediction.doctor.user.username }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="detail-card">
+    <h4 class="mb-4 fw-bold">Health Metrics Analyzed</h4>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Metric Name</th>
+                    <th>Recorded Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for feature in features %}
+                <tr>
+                    <td>{{ feature.feature_name }}</td>
+                    <td class="fw-medium">{{ feature.feature_value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,514 @@
+{% extends 'dashboard/doctor_base.html' %}
+{% load static %}
+
+{% block title %}Review Prediction - Smart Diabetes Advisor{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #64748b;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+    }
+
+    .review-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .page-header p {
+        color: var(--secondary-color);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* Patient Info Card */
+    .patient-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        margin-bottom: 2rem;
+        border-left: 5px solid var(--primary-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .patient-details {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .patient-detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .patient-detail-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--secondary-color);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+
+    .patient-detail-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .prediction-meta {
+        text-align: right;
+        font-size: 0.875rem;
+        color: var(--secondary-color);
+    }
+
+    /* Risk Cards */
+    .risk-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .risk-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .risk-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Risk Bands */
+    .risk-card.low {
+        border-top: 6px solid var(--success-color);
+    }
+
+    .risk-card.medium {
+        border-top: 6px solid var(--warning-color);
+    }
+
+    .risk-card.high {
+        border-top: 6px solid var(--danger-color);
+    }
+
+    .risk-card.insufficient {
+        border-top: 6px solid #cbd5e1;
+    }
+
+    .risk-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: #334155;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .probability {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0.25rem 0;
+        line-height: 1;
+    }
+
+    .risk-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    .risk-badge.low {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .risk-badge.medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .risk-badge.high {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .risk-badge.insufficient {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    /* Section Styles */
+    .section-container {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        position: relative;
+    }
+
+    /* Editor Styling */
+    .note-editor .note-toolbar {
+        background-color: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .note-editor {
+        border-color: #e2e8f0 !important;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .note-editor.note-frame {
+        border-radius: 8px;
+    }
+
+    /* Analysis Tabs */
+    .nav-pills .nav-link {
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        margin-right: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .nav-pills .nav-link:hover {
+        background-color: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+    }
+
+    .nav-pills {
+        margin-bottom: 1.5rem;
+        background: #f1f5f9;
+        display: inline-flex;
+        padding: 0.5rem;
+        border-radius: 12px;
+    }
+
+    /* Action Buttons */
+    .action-bar {
+        display: flex;
+        gap: 1rem;
+        padding: 2rem 0;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-action {
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-approve {
+        background: #10b981;
+        color: white;
+        flex: 2;
+        justify-content: center;
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-approve:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-reject {
+        background: white;
+        color: #ef4444;
+        border: 2px solid #ef4444;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .btn-reject:hover {
+        background: #fee2e2;
+    }
+</style>
+
+<!-- Summernote Dependencies -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+
+<div class="review-container">
+    <div class="page-header">
+        <h1>Review Prediction {{ prediction.id }}</h1>
+        <p>Review AI assessment, edit findings, and approve for patient release.</p>
+    </div>
+
+    <!-- Patient Info Card -->
+    <div class="patient-card">
+        <div class="patient-details">
+            <div class="patient-detail-item">
+                <span class="patient-detail-label">Patient Name</span>
+                <span class="patient-detail-value">
+                    {% with pname=prediction.patient.user.get_full_name|default:prediction.patient.user.username %}
+                    {{ pname }}
+                    {% endwith %}
+                </span>
+            </div>
+            <div class="patient-detail-item">
+                <span class="patient-detail-label">Age</span>
+                <span class="patient-detail-value">{{ prediction.patient.age|default:"N/A" }}</span>
+            </div>
+            <div class="patient-detail-item">
+                <span class="patient-detail-label">Gender</span>
+                <span class="patient-detail-value">{{ prediction.patient.gender|default:"N/A" }}</span>
+            </div>
+        </div>
+        <div class="prediction-meta">
+            <div><i class="bi bi-clock"></i> {{ prediction.created_at|date:"F j, Y, g:i a" }}</div>
+            <div style="margin-top: 0.25rem;">ID: {{ prediction.id }}</div>
+        </div>
+    </div>
+
+    <!-- Risk Summary Cards -->
+    <div class="risk-cards">
+        <!-- Diabetes Card -->
+        <div class="risk-card {{ prediction.diabetes_risk|lower|cut:' ' }}">
+            <div class="risk-header">
+                <i class="bi bi-droplet-fill text-primary"></i> Diabetes Assessment
+            </div>
+            {% if prediction.diabetes_risk == 'Insufficient Data' %}
+            <div style="padding: 2rem 0; text-align: center; color: #94a3b8;">
+                <i class="bi bi-exclamation-circle" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                Insufficient data provided
+            </div>
+            <span class="risk-badge insufficient">Insufficient Data</span>
+            {% else %}
+            <div class="probability">{{ prediction.diabetes_probability|floatformat:1 }}%</div>
+            <span class="risk-badge {{ prediction.diabetes_risk|lower }}">
+                {{ prediction.diabetes_risk }} Risk
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Kidney Card -->
+        <div class="risk-card {{ prediction.kidney_risk|lower|cut:' ' }}">
+            <div class="risk-header">
+                <i class="bi bi-heart-pulse-fill text-primary"></i> Kidney Risk
+            </div>
+            {% if prediction.kidney_risk == 'Insufficient Data' %}
+            <div style="padding: 2rem 0; text-align: center; color: #94a3b8;">
+                <i class="bi bi-exclamation-circle" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                Insufficient data provided
+            </div>
+            <span class="risk-badge insufficient">Insufficient Data</span>
+            {% else %}
+            <div class="probability">{{ prediction.kidney_probability|floatformat:1 }}%</div>
+            <span class="risk-badge {{ prediction.kidney_risk|lower }}">
+                {{ prediction.kidney_risk }} Risk
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Medical Recommendation -->
+        <div class="section-container">
+            <h3 class="section-title">
+                <i class="bi bi-clipboard-pulse text-primary"></i>
+                Clinical Recommendation
+                <span class="badge bg-warning text-dark ms-auto"
+                    style="font-size: 0.75rem; font-weight: normal;">Privileged Edit Mode</span>
+            </h3>
+            <p class="text-muted mb-3">
+                Review and modify the AI-generated recommendation below. This text will be visible to the patient upon
+                approval.
+            </p>
+            <textarea id="summernote" name="recommendation_text"
+                required>{{ prediction.recommendation_text|safe }}</textarea>
+        </div>
+
+        <!-- Doctor Notes -->
+        <div class="section-container">
+            <h3 class="section-title">
+                <i class="bi bi-journal-medical text-primary"></i>
+                Internal Notes
+            </h3>
+            <textarea name="doctor_notes" class="form-control" rows="4"
+                placeholder="Add private clinical notes here (not visible to patient)..."
+                style="resize: vertical; border-color: #e2e8f0; background: #f8fafc; color: #334155;">{{ prediction.doctor_notes }}</textarea>
+        </div>
+
+        <!-- Explainability Section -->
+        <div class="section-container">
+            <h3 class="section-title"><i class="bi bi-graph-up-arrow text-primary"></i> AI Model Analysis</h3>
+
+            <ul class="nav nav-pills" id="explainabilityTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="diabetes-tab-btn" data-bs-toggle="pill"
+                        data-bs-target="#diabetes-tab" type="button" role="tab" aria-selected="true">
+                        <i class="bi bi-droplet me-2"></i>Diabetes Model
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="kidney-tab-btn" data-bs-toggle="pill" data-bs-target="#kidney-tab"
+                        type="button" role="tab" aria-selected="false">
+                        <i class="bi bi-activity me-2"></i>Kidney Model
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="explainabilityTabsContent">
+
+                <!-- Diabetes Tab -->
+                <div class="tab-pane fade show active" id="diabetes-tab" role="tabpanel">
+                    {% if prediction.diabetes_risk == 'Insufficient Data' %}
+                    <div class="alert alert-light text-center py-4">Analysis not available due to insufficient data.
+                    </div>
+                    {% else %}
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-uppercase text-muted fw-bold mb-3 small text-center">
+                                        Patient-Specific Factors</h6>
+                                    {% if prediction.diabetes_shap_image %}
+                                    <img src="{{ MEDIA_URL }}{{ prediction.diabetes_shap_image }}"
+                                        class="img-fluid rounded shadow-sm mb-3 d-block mx-auto" alt="SHAP Analysis">
+                                    <div class="bg-white p-3 rounded border">
+                                        <strong class="text-primary d-block mb-1">Observation:</strong>
+                                        <p class="mb-0 text-secondary">{{ prediction.diabetes_explanation }}</p>
+                                    </div>
+                                    {% else %}
+                                    <p class="text-muted text-center">Not available.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Kidney Tab -->
+                <div class="tab-pane fade" id="kidney-tab" role="tabpanel">
+                    {% if prediction.kidney_risk == 'Insufficient Data' %}
+                    <div class="alert alert-light text-center py-4">Analysis not available due to insufficient data.
+                    </div>
+                    {% else %}
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-uppercase text-muted fw-bold mb-3 small text-center">
+                                        Patient-Specific Factors</h6>
+                                    {% if prediction.kidney_shap_image %}
+                                    <img src="{{ MEDIA_URL }}{{ prediction.kidney_shap_image }}"
+                                        class="img-fluid rounded shadow-sm mb-3 d-block mx-auto" alt="SHAP Analysis">
+                                    <div class="bg-white p-3 rounded border">
+                                        <strong class="text-primary d-block mb-1">Observation:</strong>
+                                        <p class="mb-0 text-secondary">{{ prediction.kidney_explanation }}</p>
+                                    </div>
+                                    {% else %}
+                                    <p class="text-muted text-center">Not available.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <button type="submit" name="action" value="approve" class="btn-action btn-approve">
+                <i class="bi bi-check2-circle"></i> Approve & Finalize
+            </button>
+            <button type="submit" name="action" value="reject" class="btn-action btn-reject"
+                onclick="return confirm('Are you sure you want to reject this prediction? This action cannot be undone.')">
+                <i class="bi bi-x-circle"></i> Reject Prediction
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#summernote').summernote({
+            placeholder: 'Write your clinical recommendation here...',
+            tabsize: 2,
+            height: 600,
+            toolbar: [
+                ['style', ['style', 'bold', 'underline', 'clear']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['view', ['fullscreen']]
+            ],
+            styleTags: [
+                'p', 'h4', 'h5', 'h6'
+            ]
+        });
+    });
+</script>
+{% endblock %}

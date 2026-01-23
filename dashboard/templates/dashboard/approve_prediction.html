@@ -1,0 +1,73 @@
+{% extends user.is_superuser|yesno:"dashboard/admin_base.html,dashboard/doctor_base.html" %}
+{% load static %}
+
+{% block title %}Approve Prediction - Smart Diabetes Advisor{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-check-circle me-2"></i>Approve Prediction #{{ prediction.id }}
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <!-- Prediction Summary -->
+                <div class="alert alert-info mb-4">
+                    <h6 class="mb-2"><strong>Patient:</strong> {{ prediction.patient.user.username }}</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>Diabetes Risk:</strong>
+                                <span class="badge 
+                                    {% if prediction.diabetes_risk == 'High' %}bg-danger
+                                    {% elif prediction.diabetes_risk == 'Medium' or prediction.diabetes_risk == 'Moderate' %}bg-warning
+                                    {% else %}bg-success{% endif %}">
+                                    {{ prediction.diabetes_risk }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>Kidney Risk:</strong>
+                                <span class="badge 
+                                    {% if prediction.kidney_risk == 'High' %}bg-danger
+                                    {% elif prediction.kidney_risk == 'Medium' or prediction.kidney_risk == 'Moderate' %}bg-warning
+                                    {% else %}bg-success{% endif %}">
+                                    {{ prediction.kidney_risk }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendation Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="text" class="form-label fw-semibold">
+                            <i class="bi bi-chat-left-text me-2"></i>Doctor's Recommendation / Notes
+                        </label>
+                        <textarea name="text" id="text" rows="8" class="form-control"
+                            placeholder="Provide your medical recommendation and notes for the patient..."
+                            required></textarea>
+                        <small class="text-muted">
+                            This recommendation will be visible to the patient after approval.
+                        </small>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-success btn-lg flex-fill">
+                            <i class="bi bi-check-circle me-2"></i>Approve & Save Recommendation
+                        </button>
+                        <a href="{% url 'doctor_dashboard' %}" class="btn btn-outline-secondary btn-lg flex-fill">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends user.is_superuser|yesno:"dashboard/admin_base.html,dashboard/doctor_base.html" %}
+{% load static %}
+
+{% block title %}Patient Report - Smart Diabetes Advisor{% endblock %}
+
+{% block dashboard_content %}
+<div class="detail-container">
+    <a href="{% url 'doctor_dashboard' %}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="page-header">
+        <h1>Prediction Details {{ prediction.id }}</h1>
+    </div>
+
+    <!-- Status Banner -->
+    <div class="status-banner {{ prediction.approval_status|lower }}">
+        <i class="bi bi-{% if prediction.approval_status == 'Approved' %}check-circle-fill{% elif prediction.approval_status == 'Pending' %}clock-fill{% else %}x-circle-fill{% endif %}"
+            style="font-size: 1.5rem;"></i>
+        <div style="flex-grow: 1;">
+            <strong>Status: {{ prediction.approval_status }}</strong>
+            <p style="margin: 0; font-size: 0.875rem;">
+                {% if prediction.approval_status == 'Approved' %}
+                Reviewed and approved by Dr. {{ prediction.doctor.user.username|default:"Medical Team" }} on {{
+                prediction.approved_at|date:"M d, Y" }}
+                {% elif prediction.approval_status == 'Pending' %}
+                {% if user.doctor %}
+                This prediction is pending your review.
+                {% else %}
+                Your prediction is being reviewed by our medical team.
+                {% endif %}
+                {% else %}
+                This prediction was not approved
+                {% endif %}
+            </p>
+        </div>
+        {% if prediction.approval_status == 'Pending' and user.doctor %}
+        <a href="{% url 'review_prediction' prediction.id %}" class="btn btn-primary d-flex align-items-center gap-2">
+            <i class="bi bi-pencil-square"></i> Review & Approve
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Risk Summary -->
+    <div class="risk-summary">
+        <!-- Diabetes Card -->
+        <div class="risk-card {{ prediction.diabetes_risk|lower }}">
+            <div class="risk-header">
+                <i class="bi bi-droplet-fill text-primary"></i> Diabetes Risk Assessment
+            </div>
+            <div class="probability">
+                {{ prediction.diabetes_probability|floatformat:1 }}%
+            </div>
+            <div class="risk-label {{ prediction.diabetes_risk|lower }}">
+                {% if prediction.diabetes_risk == 'Low' %}
+                <i class="bi bi-check-circle-fill"></i> Low Risk
+                {% elif prediction.diabetes_risk == 'Medium' %}
+                <i class="bi bi-exclamation-circle-fill"></i> Medium Risk
+                {% else %}
+                <i class="bi bi-exclamation-triangle-fill"></i> High Risk
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Kidney Card -->
+        <div class="risk-card {{ prediction.kidney_risk|lower }}">
+            <div class="risk-header">
+                <i class="bi bi-lungs-fill text-primary"></i> Kidney Risk
+            </div>
+            <div class="probability">
+                {{ prediction.kidney_probability|floatformat:1 }}%
+            </div>
+            <div class="risk-label {{ prediction.kidney_risk|lower }}">
+                {% if prediction.kidney_risk == 'Low' %}
+                <i class="bi bi-check-circle-fill"></i> Low Risk
+                {% elif prediction.kidney_risk == 'Medium' %}
+                <i class="bi bi-exclamation-circle-fill"></i> Medium Risk
+                {% else %}
+                <i class="bi bi-exclamation-triangle-fill"></i> High Risk
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Table -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Patient Features</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Feature</th>
+                                    <th>Value</th>
+                                    <th>SHAP Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for feature in features %}
+                                <tr>
+                                    <td class="fw-semibold">{{ feature.feature_name }}</td>
+                                    <td>{{ feature.feature_value }}</td>
+                                    <td>
+                                        {% if feature.shap_value %}
+                                        <span
+                                            class="badge {% if feature.shap_value > 0 %}bg-danger{% else %}bg-success{% endif %}">
+                                            {{ feature.shap_value|floatformat:4 }}
+                                        </span>
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Explainability (Doctor View) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="bi bi-graph-up me-2"></i>Model Explainability</h4>
+        </div>
+
+        <!-- Diabetes Feature Importance -->
+        {% if prediction.diabetes_fi_image %}
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 text-muted"><i class="bi bi-bar-chart-fill me-2"></i>Diabetes Global Feature
+                        Importance
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ MEDIA_URL }}{{ prediction.diabetes_fi_image }}" alt="Feature Importance"
+                        class="img-fluid rounded">
+                    <p class="text-muted small mt-2"><strong>Note:</strong> This shows which features are generally most
+                        important for diabetes predictions across all patients (not specific to this patient).</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Diabetes SHAP -->
+        {% if prediction.diabetes_shap_image %}
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 text-primary"><i class="bi bi-person-lines-fill me-2"></i>Diabetes Patient Analysis
+                        (SHAP)</h6>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ MEDIA_URL }}{{ prediction.diabetes_shap_image }}" alt="SHAP Summary"
+                        class="img-fluid rounded">
+                    <hr>
+                    <div class="text-start mt-3">
+                        <p class="text-dark small">{{ prediction.diabetes_explanation|default:"Analysis not available."
+                            }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if prediction.kidney_fi_image %}
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 text-muted"><i class="bi bi-bar-chart-fill me-2"></i>Kidney Global Feature
+                        Importance
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ MEDIA_URL }}{{ prediction.kidney_fi_image }}" alt="Feature Importance"
+                        class="img-fluid rounded">
+                    <p class="text-muted small mt-2"><strong>Note:</strong> This shows which features are generally most
+                        important for kidney disease predictions across all patients (not specific to this patient).</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        {% else %}
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 text-muted"><i class="bi bi-bar-chart-fill me-2"></i>Kidney Global Feature
+                        Importance
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <p class="text-muted">Feature importance not available.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Kidney SHAP -->
+        {% if prediction.kidney_shap_image %}
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 text-primary"><i class="bi bi-person-lines-fill me-2"></i>Kidney Patient Analysis
+                        (SHAP)
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ MEDIA_URL }}{{ prediction.kidney_shap_image }}" alt="SHAP Summary"
+                        class="img-fluid rounded">
+                    <hr>
+                    <div class="text-start mt-3">
+                        <p class="text-dark small">{{ prediction.kidney_explanation|default:"Analysis not available." }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Doctor Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Doctor Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-3">
+                        <a href="{% url 'approve_prediction' prediction.id %}" class="btn btn-success btn-lg flex-fill">
+                            <i class="bi bi-check-circle me-2"></i>Approve & Add Recommendation
+                        </a>
+                        <a href="{% url 'reject_prediction' prediction.id %}" class="btn btn-danger btn-lg flex-fill"
+                            onclick="return confirm('Are you sure you want to reject this prediction?')">
+                            <i class="bi bi-x-circle me-2"></i>Reject
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

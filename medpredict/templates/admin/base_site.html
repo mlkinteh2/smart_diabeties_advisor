@@ -1,0 +1,151 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* Modern Admin Dashboard Styling */
+    body {
+        font-family: 'Inter', system-ui, sans-serif;
+        background: #f8fafc;
+    }
+
+    #header {
+        background: linear-gradient(135deg, var(--admin-purple, #9333ea), var(--admin-purple-hover, #7e22ce));
+        border-bottom: none;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    #branding h1 {
+        color: white;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    #branding h1 a {
+        color: white;
+        text-decoration: none;
+    }
+
+    #user-tools {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+
+    #user-tools a {
+        color: white;
+        font-weight: 600;
+    }
+
+    .module {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        border: none;
+        overflow: hidden;
+    }
+
+    .module h2 {
+        background: #f8fafc;
+        color: #1e293b;
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .module table {
+        border: none;
+    }
+
+    .module caption {
+        background: #f8fafc;
+        color: #1e293b;
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .button,
+    input[type=submit],
+    input[type=button],
+    .submit-row input,
+    .button.default,
+    input[type=submit].default {
+        background: linear-gradient(135deg, #9333ea, #7e22ce) !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.625rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .button:hover,
+    input[type=submit]:hover,
+    input[type=button]:hover {
+        background: linear-gradient(135deg, #7e22ce, #6b21a8) !important;
+        transform: translateY(-1px);
+    }
+
+    .button.caos,
+    .button.cancel-link {
+        background: #e2e8f0 !important;
+        color: #475569 !important;
+    }
+
+    .breadcrumbs {
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .breadcrumbs a {
+        color: #9333ea;
+        font-weight: 500;
+    }
+
+    #content-main {
+        background: transparent;
+    }
+
+    .dashboard .module table th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .dashboard .module table td {
+        padding: 0.875rem 1rem;
+    }
+
+    .dashboard .module table tr:hover {
+        background: #f8fafc;
+    }
+
+    .addlink,
+    .changelink,
+    .deletelink {
+        color: #9333ea;
+        font-weight: 600;
+    }
+
+    .addlink:hover,
+    .changelink:hover,
+    .deletelink:hover {
+        color: #7e22ce;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin_dashboard' %}">🏥 Smart Diabetes Advisor Admin</a>
+</h1>
+{% endblock %}

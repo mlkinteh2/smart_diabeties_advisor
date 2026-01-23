@@ -1,0 +1,220 @@
+{% extends user.is_superuser|yesno:"dashboard/admin_base.html,dashboard/doctor_base.html" %}
+{% load static %}
+
+{% block page_title %}Prediction History{% endblock %}
+{% block page_subtitle %}View all past patient predictions and their status{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Reuse User Management Table Styles */
+    .table-panel {
+        background: white;
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .custom-table th {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        border-bottom: 1px solid var(--border-color);
+        background: #f8fafc;
+    }
+
+    .custom-table td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-main);
+        font-size: 0.9rem;
+    }
+
+    .custom-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .user-meta {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+    }
+
+    /* Badges */
+    .status-badge {
+        padding: 0.125rem 0.625rem;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .status-badge.high {
+        background: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fee2e2;
+    }
+
+    .status-badge.moderate {
+        background: #fffbeb;
+        color: #f59e0b;
+        border: 1px solid #fef3c7;
+    }
+
+    .status-badge.low {
+        background: #f0fdf4;
+        color: #10b981;
+        border: 1px solid #dcfce7;
+    }
+
+    .status-badge.approved {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .status-badge.pending {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .status-badge.rejected {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .btn-action.review {
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #ffedd5;
+    }
+
+    .btn-action.review:hover {
+        background: #ffedd5;
+    }
+
+    .btn-action.details {
+        background: #f1f5f9;
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-action.details:hover {
+        background: #e2e8f0;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="table-panel">
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Patient</th>
+                    <th>Date</th>
+                    <th>Diabetes Risk</th>
+                    <th>Kidney Risk</th>
+                    <th>Status</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in predictions %}
+                <tr>
+                    <td>{{ p.id }}</td>
+                    <td>
+                        <div class="user-info">
+                            <span class="user-name">
+                                {% if p.patient.user.get_full_name %}
+                                {{ p.patient.user.get_full_name }}
+                                {% else %}
+                                {{ p.patient.user.username }}
+                                {% endif %}
+                            </span>
+                            <span class="user-meta">Patient</span>
+                        </div>
+                    </td>
+                    <td>{{ p.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="status-badge {{ p.diabetes_risk|lower }}">
+                            {% if p.diabetes_risk == 'High' %}<i class="bi bi-exclamation-triangle-fill"></i>{% endif %}
+                            {{ p.diabetes_risk }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge {{ p.kidney_risk|lower }}">
+                            {% if p.kidney_risk == 'High' %}<i class="bi bi-exclamation-triangle-fill"></i>{% endif %}
+                            {{ p.kidney_risk }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge {{ p.approval_status|lower }}">
+                            {{ p.approval_status }}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        {% if p.approval_status == 'Pending' %}
+                        <a href="{% url 'review_prediction' p.id %}" class="btn-action review">
+                            <i class="bi bi-pencil-square"></i> Review
+                        </a>
+                        {% else %}
+                        <a href="{% url 'prediction_detail' p.id %}" class="btn-action details">
+                            <i class="bi bi-eye"></i> Details
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center gap-2">
+                            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                            <p class="text-muted m-0">No predictions found.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

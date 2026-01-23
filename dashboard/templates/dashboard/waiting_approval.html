@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Approval - MedPredict{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="alert alert-warning">
+        <h3>Prediction Pending Approval</h3>
+        <p>Your prediction results are currently being reviewed by a doctor. Please check back later.</p>
+        <a href="{% url 'patient_dashboard' %}" class="btn btn-primary" style="margin-top: 1rem;">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
