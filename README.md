@@ -180,29 +180,25 @@ A comprehensive clinical decision support system that assists healthcare profess
 
 ## 📸 Screenshots
 
-> **Note**: To add screenshots, please manually capture images of the running application and save them to a `screenshots/` directory in the project root.
 
-**Recommended screenshots to capture:**
-1. Login page
-2. Doctor dashboard with pending predictions
-3. Create prediction form
-4. Prediction detail page with SHAP visualizations
-5. Patient dashboard
-6. Admin dashboard
 
 **To add screenshots to this README:**
 ```markdown
 ### Login Page
-![Login](screenshots/login.png)
+<img width="1836" height="863" alt="image" src="https://github.com/user-attachments/assets/995f46d5-76c5-4f27-afef-e770c64ce8ce" />
+
 
 ### Doctor Dashboard
-![Doctor Dashboard](screenshots/doctor_dashboard.png)
+<img width="1884" height="841" alt="image" src="https://github.com/user-attachments/assets/3132e0aa-7e96-4e33-a3ff-2c7dd0c3e776" />
+
 
 ### Prediction with SHAP Analysis
-![Prediction Detail](screenshots/prediction_detail.png)
+<img width="1292" height="826" alt="image" src="https://github.com/user-attachments/assets/9deaf86d-7e80-4f55-84de-ff06ab6abf29" />
+
 
 ### Patient Dashboard
-![Patient Dashboard](screenshots/patient_dashboard.png)
+<img width="1875" height="756" alt="image" src="https://github.com/user-attachments/assets/09bc4116-aeab-44f7-9d00-0d375250a961" />
+
 ```
 
 ## 📊 Model Performance
@@ -297,5 +293,6 @@ This project was developed as a Final Year Project for [Your University Name]. F
 - Albukhary Dialysis Centre - External validation dataset
 
 ---
+
 
 **⚠️ Medical Disclaimer**: This system is a clinical decision support tool and should not replace professional medical judgment. All predictions must be reviewed and approved by licensed healthcare professionals before being communicated to patients.
