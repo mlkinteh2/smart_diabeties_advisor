@@ -185,11 +185,13 @@ A comprehensive clinical decision support system that assists healthcare profess
 **To add screenshots to this README:**
 ```markdown
 ### Login Page
-<img width="1836" height="863" alt="image" src="https://github.com/user-attachments/assets/995f46d5-76c5-4f27-afef-e770c64ce8ce" />
+<img width="1871" height="838" alt="image" src="https://github.com/user-attachments/assets/8ea376e9-3261-456e-8841-baa13a476b8a" />
+
 
 
 ### Doctor Dashboard
-<img width="1884" height="841" alt="image" src="https://github.com/user-attachments/assets/3132e0aa-7e96-4e33-a3ff-2c7dd0c3e776" />
+<img width="1884" height="846" alt="image" src="https://github.com/user-attachments/assets/917985f5-e924-49d0-94c8-92f2d86a1425" />
+
 
 
 ### Prediction with SHAP Analysis
@@ -296,3 +298,4 @@ This project was developed as a Final Year Project for [Your University Name]. F
 
 
 **⚠️ Medical Disclaimer**: This system is a clinical decision support tool and should not replace professional medical judgment. All predictions must be reviewed and approved by licensed healthcare professionals before being communicated to patients.
+
