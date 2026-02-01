@@ -1,4 +1,8 @@
 # Smart Diabetes Advisor
+<img width="1871" height="838" alt="image" src="https://github.com/user-attachments/assets/92b2971a-3afd-4f41-a9d9-6a7ef7bf30e5" />
+<img width="1862" height="819" alt="image" src="https://github.com/user-attachments/assets/edca264b-0590-4350-85b5-eca687c01989" />
+
+
 
 A comprehensive clinical decision support system that assists healthcare professionals in the early detection and management of diabetes mellitus and chronic kidney disease (CKD). The system integrates machine learning models with SHAP-based explainability and implements a mandatory "doctor-in-the-loop" approval workflow to ensure patient safety.
 
@@ -183,19 +187,22 @@ A comprehensive clinical decision support system that assists healthcare profess
 
 
 **To add screenshots to this README:**
-```markdown
+
 ### Login Page
-<img width="1871" height="838" alt="image" src="https://github.com/user-attachments/assets/8ea376e9-3261-456e-8841-baa13a476b8a" />
+<img width="1871" height="838" alt="image" src="https://github.com/user-attachments/assets/04827cb7-0fb4-438c-b6f3-b6d3fbe9a570" />
+
 
 
 
 ### Doctor Dashboard
-<img width="1884" height="846" alt="image" src="https://github.com/user-attachments/assets/917985f5-e924-49d0-94c8-92f2d86a1425" />
+<img width="1884" height="846" alt="image" src="https://github.com/user-attachments/assets/5e9ee55f-2fd5-4594-86e3-8a84c08c6911" />
+
 
 
 
 ### Prediction with SHAP Analysis
-<img width="1292" height="826" alt="image" src="https://github.com/user-attachments/assets/9deaf86d-7e80-4f55-84de-ff06ab6abf29" />
+<img width="1850" height="865" alt="image" src="https://github.com/user-attachments/assets/df808b7a-df34-4b2c-87f8-98973f068108" />
+
 
 
 ### Patient Dashboard
@@ -298,4 +305,5 @@ This project was developed as a Final Year Project for [Your University Name]. F
 
 
 **⚠️ Medical Disclaimer**: This system is a clinical decision support tool and should not replace professional medical judgment. All predictions must be reviewed and approved by licensed healthcare professionals before being communicated to patients.
+
 
