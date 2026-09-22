@@ -158,6 +158,27 @@ A comprehensive clinical decision support system that assists healthcare profess
 
 ## 🚀 Usage
 
+## ☁️ Deploying to Vercel
+
+This repository includes a Vercel Python function configuration in `vercel.json`.
+Before deploying, create a hosted PostgreSQL database. Vercel functions do not provide
+persistent local SQLite or media storage, so the production `DATABASE_URL` must point to
+PostgreSQL. Uploaded/generated media should be moved to an object-storage service before
+using the application with real patient records.
+
+1. Import `mlkinteh2/smart_diabeties_advisor` into Vercel with the root directory set to the directory containing `manage.py`.
+2. Add `DJANGO_SECRET_KEY`, `DATABASE_URL`, `DJANGO_DEBUG=False`, and `DJANGO_CSRF_TRUSTED_ORIGINS=https://<your-vercel-domain>` as environment variables.
+3. Deploy. The configured build runs `python manage.py collectstatic --noinput`.
+4. Run migrations against the hosted database from a trusted machine with the same `DATABASE_URL`:
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
+
+The ML model files under `predictions/ml/` are bundled with the function. Vercel's function
+size and build limits should be checked after the first deployment because NumPy, SciPy,
+scikit-learn, pandas, SHAP, and Matplotlib are substantial dependencies.
+
 ### For Doctors
 
 1. **Login** with your doctor credentials

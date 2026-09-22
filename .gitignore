@@ -161,5 +161,6 @@ Thumbs.db
 
 # Project specific
 media/
+staticfiles/
 screenshots/
 *.log
