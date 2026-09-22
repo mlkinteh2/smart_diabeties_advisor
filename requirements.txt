@@ -1,6 +1,7 @@
 Django==5.2.8
 whitenoise==6.9.0
 psycopg2-binary==2.9.11
+typing_extensions>=4.12.0
 scikit-learn>=1.6.0
 numpy>=1.24.0
 pandas>=2.0.0
