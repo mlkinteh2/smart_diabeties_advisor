@@ -1,6 +1,7 @@
 {
   "version": 2,
   "buildCommand": "DATABASE_URL= python manage.py collectstatic --noinput",
+  "outputDirectory": "staticfiles",
   "rewrites": [
     {
       "source": "/(.*)",
