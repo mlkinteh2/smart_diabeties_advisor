@@ -3,6 +3,7 @@ import numpy as np
 import joblib
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.utils import timezone
 from .models import Prediction, PredictionFeature
 from accounts.models import Patient, Doctor
@@ -159,17 +160,10 @@ def create_prediction(request, patient_id):
                 k_urea = max(5, min(400, urea))               # mg/dL (no conversion needed)
                 k_albumin = max(0, min(5, albumin_val))
                 
-                import pandas as pd
-                kidney_df = pd.DataFrame({
-                    'Creatinine': [k_creatinine],      # Already in mg/dL
-                    'Pottasium': [k_potassium],
-                    'Hemoglobin': [k_hemoglobin],
-                    'Sodium': [k_sodium],
-                    'Blood Pressure': [k_bp],
-                    'Red Blood Cell': [rbc_val],
-                    'Urea': [k_urea],                  # Already in mg/dL
-                    'Albumin': [k_albumin]
-                })
+                kidney_input = np.asarray([[
+                    k_creatinine, k_potassium, k_hemoglobin, k_sodium,
+                    k_bp, rbc_val, k_urea, k_albumin,
+                ]], dtype=np.float64)
                 
                 kidney_features_to_save = {
                     'Creatinine': k_creatinine, 'Pottasium': k_potassium, 'Hemoglobin': k_hemoglobin,
@@ -178,7 +172,7 @@ def create_prediction(request, patient_id):
                 }
                 
                 try:
-                    kidney_input_scaled = kidney_scaler.transform(kidney_df)
+                    kidney_input_scaled = kidney_scaler.transform(kidney_input)
                     kidney_prob = float(kidney_model.predict_proba(kidney_input_scaled)[0][1] * 100)
                     if kidney_prob > 95.0: kidney_prob = 95.0
                     
@@ -223,23 +217,11 @@ def create_prediction(request, patient_id):
             if diabetes_risk not in ["Insufficient Data", "Error"]:
                 try:
                     from .explainability import generate_patient_shap
-                    import pandas as pd
-                    
-                    # Background data loading (abbreviated for brevity, assuming similar to before but cached/handled)
-                    # For now passing None to skip expensive BG loading if not critical, or reload if needed.
-                    # Re-implementing simplified BG load to prevent regression
-                    try:
-                        diabetes_bg = pd.read_csv('predictions/ml/diabetes.csv')
-                        diabetes_bg = diabetes_bg[['Age', 'BMI', 'BloodPressure', 'Glucose']].iloc[:50]
-                        diabetes_bg_scaled = diabetes_scaler.transform(diabetes_bg)
-                    except:
-                        diabetes_bg_scaled = None
-                        
                     d_feat_names = ['Age', 'BMI', 'BloodPressure', 'Glucose']
                     
                     d_shap_path, d_explanation, d_shap_details = generate_patient_shap(
                         diabetes_model, diabetes_scaler, diabetes_input, d_feat_names, 
-                        prediction.id, 'diabetes', risk_level=diabetes_risk, background_data=diabetes_bg_scaled
+                        prediction.id, 'diabetes', risk_level=diabetes_risk, background_data=None
                     )
                     prediction.diabetes_shap_image = d_shap_path
                 except Exception as e:
@@ -248,23 +230,6 @@ def create_prediction(request, patient_id):
             if kidney_risk not in ["Insufficient Data", "Error"]:
                 try:
                     from .explainability import generate_patient_shap
-                    import pandas as pd
-                    
-                    try:
-                        df1 = pd.read_csv('predictions/ml/kidney.csv')
-                        rename_map = {
-                            'Bp': 'Blood Pressure', 'Sg': 'Specific Gravity', 'Al': 'Albumin', 'Su': 'Sugar',
-                            'Rbc': 'Red Blood Cell', 'Bu': 'Urea', 'Sc': 'Creatinine', 'Sod': 'Sodium',
-                            'Pot': 'Pottasium', 'Hemo': 'Hemoglobin', 'Wbcc': 'White Blood Cell Count',
-                            'Rbcc': 'Red Blood Cell Count', 'Htn': 'Hypertension', 'Class': 'Predicted Class'
-                        }
-                        df1.rename(columns=rename_map, inplace=True)
-                        required_cols = ['Creatinine', 'Pottasium', 'Hemoglobin', 'Sodium', 'Blood Pressure', 'Red Blood Cell', 'Urea', 'Albumin']
-                        kidney_bg_raw = df1[required_cols].iloc[:50]
-                        kidney_bg = kidney_scaler.transform(kidney_bg_raw)
-                    except:
-                        kidney_bg = None
-
                     k_feat_names = ['Creatinine', 'Pottasium', 'Hemoglobin', 'Sodium', 'Blood Pressure', 'Red Blood Cell', 'Urea', 'Albumin']
                     
                     # Reconstruct input array (all values already in correct units)
@@ -272,7 +237,7 @@ def create_prediction(request, patient_id):
                     
                     k_shap_path, k_explanation, k_shap_details = generate_patient_shap(
                         kidney_model, kidney_scaler, k_input_vals, k_feat_names, 
-                        prediction.id, 'kidney', risk_level=kidney_risk, background_data=kidney_bg
+                        prediction.id, 'kidney', risk_level=kidney_risk, background_data=None
                     )
                     prediction.kidney_shap_image = k_shap_path
                 except Exception as e:
@@ -418,8 +383,9 @@ def prediction_detail(request, id):
 @login_required
 def prediction_list(request):
     """List all predictions for current user"""
+    # Admins should NOT have access to patient medical data
     if request.user.is_superuser:
-        predictions = Prediction.objects.all().order_by('-created_at')
+        return render(request, "dashboard/not_doctor.html")
     elif hasattr(request.user, 'patient'):
         predictions = Prediction.objects.filter(patient=request.user.patient).order_by('-created_at')
     elif hasattr(request.user, 'doctor'):
