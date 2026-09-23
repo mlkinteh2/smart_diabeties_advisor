@@ -168,6 +168,7 @@ using the application with real patient records.
 
 1. Import `mlkinteh2/smart_diabeties_advisor` into Vercel with the root directory set to the directory containing `manage.py`.
 2. Add `DJANGO_SECRET_KEY`, `DATABASE_URL`, `DJANGO_DEBUG=False`, and `DJANGO_CSRF_TRUSTED_ORIGINS=https://<your-vercel-domain>` as environment variables.
+   Also add the non-secret project variable `VERCEL_SUPPORT_LARGE_FUNCTIONS=1` to enable Vercel's larger Python function bundle limit.
 3. Deploy. The configured build runs `python manage.py collectstatic --noinput`.
 4. Run migrations against the hosted database from a trusted machine with the same `DATABASE_URL`:
    ```bash

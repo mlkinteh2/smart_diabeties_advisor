@@ -2,6 +2,9 @@
   "version": 2,
   "buildCommand": "DATABASE_URL= python manage.py collectstatic --noinput",
   "outputDirectory": "staticfiles",
+  "env": {
+    "VERCEL_SUPPORT_LARGE_FUNCTIONS": "1"
+  },
   "functions": {
     "api/index.py": {
       "excludeFiles": "{**/*.ipynb,**/*.md,**/*.xlsx,**/*.csv,screenshots/**,media/**,**/test_*.py,**/debug_*.py,**/check_*.py,**/fix_*.py,**/retrain_*.py,**/run_*.py,**/create_*.py,**/refactor_*.py}"
