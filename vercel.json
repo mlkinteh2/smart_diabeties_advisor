@@ -4,7 +4,7 @@
   "outputDirectory": "staticfiles",
   "functions": {
     "api/index.py": {
-      "excludeFiles": "{**/*.ipynb,**/*.md,**/*.xlsx,screenshots/**,media/**,**/test_*.py,**/debug_*.py,**/check_*.py,**/compare_*.py,**/create_*.py,**/fix_*.py,**/generate_*.py,**/retrain_*.py,**/run_*.py,**/reproduce_*.py,**/refactor_*.py,**/remove_*.py,**/update_*.py,predictions/ml/*.csv}"
+      "excludeFiles": "{**/*.ipynb,**/*.md,**/*.xlsx,**/*.csv,screenshots/**,media/**,**/test_*.py,**/debug_*.py,**/check_*.py,**/fix_*.py,**/retrain_*.py,**/run_*.py,**/create_*.py,**/refactor_*.py}"
     }
   },
   "rewrites": [
