@@ -1,8 +1,4 @@
 import os
-import matplotlib
-matplotlib.use('Agg')  # Force Agg backend before importing pyplot
-import matplotlib.pyplot as plt
-import shap
 import numpy as np
 import joblib
 from pathlib import Path
@@ -11,6 +7,17 @@ from django.conf import settings
 # Ensure output directory exists
 EXPLAIN_DIR = Path(settings.MEDIA_ROOT) / "explain"
 EXPLAIN_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _load_plotting_dependencies():
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        import shap
+        return plt, shap
+    except ImportError:
+        return None, None
 
 def generate_global_feature_importance(model, feature_names, model_name, background_data=None):
     """
@@ -28,6 +35,9 @@ def generate_global_feature_importance(model, feature_names, model_name, backgro
     """
     filename = f"global_{model_name}_fi.png"
     filepath = EXPLAIN_DIR / filename
+    plt, shap = _load_plotting_dependencies()
+    if plt is None:
+        return None
     
     # If file exists, return existing path (reuse)
     # Check if file exists and ensure it's not empty/corrupt (basic check)
@@ -172,6 +182,9 @@ def generate_patient_shap(model, scaler, input_data, feature_names, prediction_i
     """
     filename = f"shap_{model_name}_{prediction_id}.png"
     filepath = EXPLAIN_DIR / filename
+    plt, shap = _load_plotting_dependencies()
+    if plt is None:
+        return None, explanation_text, {}
     
     explanation_text = "Analysis not available."
     
